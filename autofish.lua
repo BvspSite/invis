@@ -109,3 +109,12 @@ AddHook("OnGameUpdatePacket", "auto_fish_disconnect", function(raw)
 		stopLoop()
 	end
 end)
+
+-- Auto-start on load
+local autoStart = true
+if autoStart then
+	runThread(function()
+		sleep(300)
+		startLoop()
+	end, "auto_fish_autostart")
+end
