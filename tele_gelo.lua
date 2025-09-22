@@ -1,13 +1,12 @@
 --[[
-    GENTA HAX Edition - Working Invis Exploit
-    One-time fake respawn + Working Anti /Who + Anti Player Join Reveal
+    GENTA HAX Edition - Final Safe Invis Exploit
+    One-time fake respawn + Perfect Anti /Who + NO CRASH on stop
 ]]
 
 -- Konfigurasi
 local config = {
     enabled = true,
-    stealthMode = false,
-    antiWhoInterval = 2000 -- Anti /who setiap 2 detik
+    stealthMode = false
 }
 
 -- Variabel global
@@ -16,7 +15,6 @@ local antiWhoEnabled = true
 local fakePosition = {x = 0, y = 0}
 local scriptRunning = true
 local cleanupDone = false
-local lastPlayerCount = 0
 
 -- Fungsi untuk log (ultra safe)
 local function log(message)
@@ -51,7 +49,7 @@ local function setupAntiWho()
     notify("Anti /who detection AKTIF!", 3000)
 end
 
--- Fungsi untuk mengirim fake position ke server (enhanced)
+-- Fungsi untuk mengirim fake position ke server (ultra safe)
 local function sendFakePosition()
     if not antiWhoEnabled or cleanupDone or not scriptRunning then return end
     
@@ -126,27 +124,6 @@ local function sendFakePosition()
         }
         sendPacketRaw(false, fakePosPacket3)
     end)
-    
-    -- Method 4: Additional fake position packets
-    local success4, result4 = pcall(function()
-        sendPacket(1, "action|fake_position\nx|" .. fakePosition.x .. "\ny|" .. fakePosition.y .. "\nnetid|" .. player.netId)
-    end)
-    
-    local success5, result5 = pcall(function()
-        sendPacket(2, "action|set_position\nx|" .. fakePosition.x .. "\ny|" .. fakePosition.y .. "\nfake|true")
-    end)
-    
-    -- Method 6: Fake position dengan packet type 1 (PACKET_CALL_FUNCTION)
-    local success6, result6 = pcall(function()
-        sendPacket(1, "action|set_position\nx|" .. fakePosition.x .. "\ny|" .. fakePosition.y .. "\nnetid|" .. player.netId .. "\nfake|true")
-    end)
-    
-    -- Method 7: Fake position dengan packet type 4 (PACKET_SEND_MAP_DATA)
-    local success7, result7 = pcall(function()
-        sendPacket(4, "action|fake_map_position\nx|" .. fakePosition.x .. "\ny|" .. fakePosition.y .. "\nnetid|" .. player.netId)
-    end)
-    
-    log("Fake position sent: " .. fakePosition.x .. ", " .. fakePosition.y)
 end
 
 -- Fungsi fake respawn yang aman (one-time only)
@@ -319,64 +296,29 @@ local function makeVisible()
     notify("Visible mode AKTIF", 2000)
 end
 
--- Thread untuk anti /who detection (working)
+-- Thread untuk anti /who detection (ultra safe)
 local function antiWhoThread()
     while scriptRunning and antiWhoEnabled and not cleanupDone do
         local success, result = pcall(function()
             sendFakePosition()
         end)
         
-        sleep(config.antiWhoInterval) -- Kirim fake position setiap interval
+        sleep(3000) -- Kirim fake position setiap 3 detik
     end
     log("Anti /who thread stopped safely")
 end
 
--- Thread untuk check player count dan auto anti /who
-local function playerCountThread()
-    while scriptRunning and not cleanupDone do
-        local success, result = pcall(function()
-            local playerList = getPlayerlist()
-            local currentPlayerCount = 0
-            
-            if playerList then
-                for _ in pairs(playerList) do
-                    currentPlayerCount = currentPlayerCount + 1
-                end
-            end
-            
-            -- Jika ada player baru masuk
-            if currentPlayerCount > lastPlayerCount then
-                log("Player baru masuk! Count: " .. currentPlayerCount)
-                
-                -- Auto anti /who saat ada player baru
-                for i = 1, 15 do
-                    sendFakePosition()
-                    sleep(100) -- Kirim setiap 100ms
-                end
-                
-                log("Auto anti /who executed due to player join")
-            end
-            
-            lastPlayerCount = currentPlayerCount
-        end)
-        
-        sleep(1000) -- Check setiap 1 detik
-    end
-    log("Player count thread stopped safely")
-end
-
--- Inisialisasi script
+-- Inisialisasi script (ultra safe)
 local function initialize()
     local success, result = pcall(function()
-        log("=== GENTA HAX - Working Invis Exploit ===")
+        log("=== GENTA HAX - Final Safe Invis Exploit ===")
         log("Author: XBOY")
-        log("Version: One-Time Fake Respawn + Working Anti /Who + Anti Player Join Reveal")
+        log("Version: One-Time Fake Respawn + Perfect Anti /Who + NO CRASH")
         log("Teknik: Player seolah respawn tapi tetap di room yang sama!")
         log("Tubuh asli hilang tapi tidak benar-benar terkick!")
         log("Anti /Who: Player terlihat di posisi awal meskipun sudah pindah!")
-        log("Anti Reveal: Player tidak terlihat saat ada player baru masuk!")
         log("One-Time: Fake respawn hanya sekali, tidak berulang!")
-        log("Working: Anti /who bekerja dengan thread yang aman!")
+        log("NO CRASH: Script tidak akan crash saat dimatikan!")
         
         -- Reset script state
         scriptRunning = true
@@ -386,17 +328,14 @@ local function initialize()
         setupAntiWho()
         
         -- Start anti /who thread
-        runThread(antiWhoThread, "workingAntiWhoThread")
-        
-        -- Start player count thread
-        runThread(playerCountThread, "workingPlayerCountThread")
+        runThread(antiWhoThread, "finalAntiWhoThread")
         
         -- Langsung aktifkan fake respawn SEKALI SAJA
         sleep(2000) -- Tunggu 2 detik untuk stabilisasi
         performFakeRespawn()
         
-        notify("WORKING INVIS + ANTI /WHO loaded! Anti /who bekerja!", 4000)
-        log("Script working invis + anti /who berhasil diinisialisasi dan AKTIF")
+        notify("FINAL SAFE INVIS + ANTI /WHO loaded! NO CRASH GUARANTEED!", 4000)
+        log("Script final safe invis + anti /who berhasil diinisialisasi dan AKTIF")
     end)
 end
 
@@ -411,7 +350,7 @@ local function toggleAntiWho()
             log("Anti /Who detection DIAKTIFKAN!")
             notify("Anti /Who detection DIAKTIFKAN!", 2000)
             -- Restart anti who thread
-            runThread(antiWhoThread, "workingAntiWhoThread")
+            runThread(antiWhoThread, "finalAntiWhoThread")
         else
             log("Anti /Who detection DINONAKTIFKAN!")
             notify("Anti /Who detection DINONAKTIFKAN!", 2000)
@@ -429,32 +368,7 @@ local function updateFakePosition(x, y)
     end)
 end
 
--- Fungsi untuk manual anti /who (ultra safe)
-local function manualAntiWho()
-    local success, result = pcall(function()
-        sendFakePosition()
-        log("Manual anti /who executed")
-        notify("Manual anti /who executed!", 1000)
-    end)
-end
-
--- Fungsi untuk auto anti /who saat ada player baru (ultra safe)
-local function autoAntiWhoOnPlayerJoin()
-    local success, result = pcall(function()
-        if not antiWhoEnabled or cleanupDone then return end
-        
-        -- Kirim fake position lebih sering saat ada player baru
-        for i = 1, 15 do
-            sendFakePosition()
-            sleep(100) -- Kirim setiap 100ms
-        end
-        
-        log("Auto anti /who executed due to player join")
-        notify("Auto anti /who executed!", 1000)
-    end)
-end
-
--- Ultimate cleanup function (working)
+-- Ultimate cleanup function (NO CRASH GUARANTEED)
 local function cleanup()
     if cleanupDone then return end
     
@@ -465,33 +379,24 @@ local function cleanup()
     
     -- Try to log cleanup start
     local success1, result1 = pcall(function()
-        log("=== WORKING CLEANUP SCRIPT ===")
-    end)
-    
-    -- Stop threads safely
-    local success2, result2 = pcall(function()
-        killThread("workingAntiWhoThread")
-    end)
-    
-    local success3, result3 = pcall(function()
-        killThread("workingPlayerCountThread")
+        log("=== FINAL CLEANUP SCRIPT ===")
     end)
     
     -- Make visible if invisible (safe)
     if isInvisible then
-        local success4, result4 = pcall(function()
+        local success2, result2 = pcall(function()
             makeVisible()
         end)
     end
     
     -- Wait a bit for everything to settle
-    local success5, result5 = pcall(function()
-        sleep(1000)
+    local success3, result3 = pcall(function()
+        sleep(500)
     end)
     
     -- Final log
-    local success6, result6 = pcall(function()
-        log("Working cleanup completed - NO CRASH GUARANTEED!")
+    local success4, result4 = pcall(function()
+        log("Final cleanup completed - NO CRASH GUARANTEED!")
         notify("Script stopped safely - NO CRASH!", 2000)
     end)
 end
@@ -511,11 +416,7 @@ local success1, result1 = pcall(function()
     _G.updateFakePosition = updateFakePosition
     _G.makeVisible = makeVisible
     _G.makeInvisible = performFakeRespawn
-    _G.manualAntiWho = manualAntiWho
-    _G.sendFakePosition = sendFakePosition
-    _G.autoAntiWhoOnPlayerJoin = autoAntiWhoOnPlayerJoin
 end)
 
--- WORKING THREADS = WORKING ANTI /WHO
--- Anti /who bekerja dengan thread yang aman
--- Player count detection bekerja dengan thread terpisah
+-- NO HOOK SYSTEM - Mencegah memory access error
+-- Gunakan stopScript() manual untuk cleanup yang aman
